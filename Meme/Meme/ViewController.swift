@@ -10,10 +10,33 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    var networkClient: NetworkClient
-    init(networkClient: NetworkClient) {
-        self.networkClient = networkClient
+    let viewModel: ViewModel
+    var memes = [Meme]()
+    var templates = [Template]()
+    init(viewModel: ViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+
+        setupDelegates()
+    }
+
+    func setupDelegates() {
+
+        self.viewModel.setDidDownloadTemplates(delegate: self) { (self, templates) in
+            self.templates = templates
+
+            self.templates.forEach({ [weak self] template in
+                self?.getTemplateExample(template)
+            })
+        }
+
+        self.viewModel.setDidDownloadTemplateExample(delegate: self) { (self, templateExample) in
+            self.getMeme(templateExample)
+        }
+
+        self.viewModel.setDidDownloadMeme(delegate: self) { (self, meme) in
+            self.memes.append(meme)
+        }
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -22,25 +45,14 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        getMemeTemplates()
+        self.viewModel.requestTemplates()
     }
 
-    func getMemeTemplates() {
-        let session = URLSession(configuration: URLSessionConfiguration.default)
-        let url =  URL(string: "https://memegen.link/api/templates")!
-        let request = URLRequest(url:url)
-        let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
-            if let data =  data {
-                do {
-                    if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] {
-                        print(jsonResponse)
-                    }
-                } catch let error as NSError {
-                    print("Error decoding values: \(error.localizedDescription)")
-                }
+    func getTemplateExample(_ template: Template) {
+        self.viewModel.requestTemplateExample(template: template)
+    }
 
-            }
-        }
-        task.resume()
+    func getMeme(_ templateExample: TemplateExample) {
+        self.viewModel.requestMeme(templateExample: templateExample)
     }
 }

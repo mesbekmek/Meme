@@ -13,9 +13,6 @@ class NetworkClient {
     let templateParser: TemplateParser
     let memeParser: MemeParser
     let templateExampleParser: TemplateExampleParser
-    var templates = [Template]()
-    var templateExample = TemplateExample(name: "", exampleURL: URL(string: "https://www.apple.com")!)
-    var meme = Meme(name: "", imageURL: URL(string: "https://www.apple.com")!)
 
     init(templateParser: TemplateParser, memeParser: MemeParser, templateExampleParser: TemplateExampleParser) {
         self.templateParser = templateParser
@@ -24,61 +21,52 @@ class NetworkClient {
     }
 
     fileprivate func getTemplates(_ data: Data?) -> [Template]? {
-        if let data = data {
-            if let templates = self.templateParser.parse(data: data) {
-                return templates
-            }
-        }
-        return nil
+        guard let data = data,
+            let templates = self.templateParser.parse(data: data) else {return nil}
+        return templates
     }
 
     fileprivate func getTemplateExample(_ data: Data?) -> TemplateExample? {
-        if let data = data {
-            if let templateExample = self.templateExampleParser.parse(data: data) {
-                return templateExample
-            }
-        }
-        return nil
+        guard let data = data,
+            let templateExample = self.templateExampleParser.parse(data: data) else {return nil}
+        return templateExample
     }
 
     fileprivate func getMemes(_ data: Data?, memeName: String) -> Meme? {
-        if let data = data {
-            if let meme = self.memeParser.parse(imageData: data, memeName: memeName) {
-                return meme
-            }
-        }
-        return nil
+        guard let data = data,
+            let meme = self.memeParser.parse(imageData: data, memeName: memeName) else {return nil}
+        return meme
     }
 
-    func requestTemplates()  {
-        let session = URLSession(configuration: URLSessionConfiguration.default)
+    func requestTemplates(completion: @escaping ([Template]) -> Void)  {
+        let session = URLSession.shared
         let url =  URL(string: "https://memegen.link/api/templates")!
         let request = URLRequest(url:url)
         let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
             guard let templates = self.getTemplates(data) else { return }
-            self.templates = templates
+            completion(templates)
         }
         task.resume()
     }
 
-    func requestTemplateExample(_ template: Template) {
-        let session = URLSession(configuration: URLSessionConfiguration.default)
+    func requestTemplateExample(_ template: Template, completion: @escaping (TemplateExample) -> Void) {
+        let session = URLSession.shared
         let url =  template.templateURL
         let request = URLRequest(url:url)
         let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
-            guard let templateExamples = self.getTemplateExample(data) else { return }
-            self.templateExample = templateExamples
+            guard let templateExample = self.getTemplateExample(data) else { return }
+            completion(templateExample)
         }
         task.resume()
     }
 
-    func requestMeme(_ templateExample: TemplateExample) {
-        let session = URLSession(configuration: URLSessionConfiguration.default)
+    func requestMeme(_ templateExample: TemplateExample, completion: @escaping (Meme) -> Void) {
+        let session = URLSession.shared
         let url =  templateExample.exampleURL
         let request = URLRequest(url:url)
         let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
             guard let meme = self.getMemes(data, memeName: templateExample.name) else { return }
-            self.meme = meme
+            completion(meme)
         }
         task.resume()
     }

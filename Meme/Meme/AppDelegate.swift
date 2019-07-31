@@ -19,7 +19,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let templateExampleParser = TemplateExampleParser()
         let memeParser = MemeParser()
         let networkClient = NetworkClient(templateParser: templateParser, memeParser: memeParser, templateExampleParser: templateExampleParser)
-        let memeVC = ViewController(networkClient: networkClient)
+        let viewModel = ViewModel(networkClient: networkClient)
+        let memeVC = ViewController(viewModel: viewModel)
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = memeVC
         window?.makeKeyAndVisible()

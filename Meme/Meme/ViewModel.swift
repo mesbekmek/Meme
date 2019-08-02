@@ -11,53 +11,26 @@ import Foundation
 class ViewModel {
 
     let networkClient: NetworkClient
-    private var didDownloadTemplates: (([Template]) -> Void)?
-    private var didDownloadTemplateExample: ((TemplateExample) -> Void)?
-    private var didDownloadMeme:((Meme) -> Void)?
 
     required init(networkClient: NetworkClient) {
         self.networkClient = networkClient
     }
 
-    func setDidDownloadTemplates<Object: AnyObject>(delegate:Object, completion: @escaping (Object, [Template]) -> Void) {
-        self.didDownloadTemplates = { [weak delegate] templates in
-            if let delegate = delegate {
-                completion(delegate, templates)
-            }
-        }
-    }
-
-    func setDidDownloadTemplateExample<Object: AnyObject>(delegate:Object, completion: @escaping (Object, TemplateExample) -> Void) {
-        self.didDownloadTemplateExample = { [weak delegate] templateExample in
-            if let delegate = delegate {
-                completion(delegate, templateExample)
-            }
-        }
-    }
-
-    func setDidDownloadMeme<Object: AnyObject>(delegate:Object, completion: @escaping (Object, Meme) -> Void) {
-        self.didDownloadMeme = { [weak delegate] meme in
-            if let delegate = delegate {
-                completion(delegate, meme)
-            }
-        }
-    }
-
-    func requestTemplates() {
+    func requestTemplates(completion: @escaping ([Template]) -> Void?) {
         self.networkClient.requestTemplates { templates in
-            self.didDownloadTemplates?(templates)
+            completion(templates)
         }
     }
 
-    func requestTemplateExample(template: Template) {
+    func requestTemplateExample(template: Template, withCompletion completion: @escaping (TemplateExample) -> Void?) {
         self.networkClient.requestTemplateExample(template) { templateExample in
-            self.didDownloadTemplateExample?(templateExample)
+            completion(templateExample)
         }
     }
 
-    func requestMeme(templateExample: TemplateExample) {
+    func requestMeme(templateExample: TemplateExample, withCompletion completion: @escaping (Meme) -> Void?) {
         self.networkClient.requestMeme(templateExample) { meme in
-            self.didDownloadMeme?(meme)
+            completion(meme)
         }
     }
 }

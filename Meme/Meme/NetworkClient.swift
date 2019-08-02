@@ -10,31 +10,42 @@ import Foundation
 
 class NetworkClient {
 
-    let templateParser: TemplateParser
-    let memeParser: MemeParser
-    let templateExampleParser: TemplateExampleParser
-
-    init(templateParser: TemplateParser, memeParser: MemeParser, templateExampleParser: TemplateExampleParser) {
-        self.templateParser = templateParser
-        self.memeParser = memeParser
-        self.templateExampleParser = templateExampleParser
-    }
-
     fileprivate func getTemplates(_ data: Data?) -> [Template]? {
         guard let data = data,
-            let templates = self.templateParser.parse(data: data) else {return nil}
+            let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] else {
+                print("Error deserializing template data");
+                return nil
+        }
+
+        var templates = [Template]()
+        jsonResponse.forEach { (key, value) in
+            var dictionary = [String:Any]()
+            dictionary[key] = value
+            if let template = Template.init(dictionary: dictionary) {
+                templates.append(template)
+            }
+        }
         return templates
     }
 
     fileprivate func getTemplateExample(_ data: Data?) -> TemplateExample? {
         guard let data = data,
-            let templateExample = self.templateExampleParser.parse(data: data) else {return nil}
+            let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
+            let templateExample = TemplateExample.init(dictionary: jsonResponse) else {
+                print("Error deserializing template example data");
+                return nil
+        }
+
         return templateExample
     }
 
-    fileprivate func getMemes(_ data: Data?, memeName: String) -> Meme? {
+    fileprivate func getMeme(_ data: Data?, memeName: String) -> Meme? {
         guard let data = data,
-            let meme = self.memeParser.parse(imageData: data, memeName: memeName) else {return nil}
+            let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any],
+            let meme = Meme.init(dictionary: jsonResponse, memeName: memeName) else {
+                print("Error deserializing Meme data");
+                return nil
+        }
         return meme
     }
 
@@ -65,7 +76,7 @@ class NetworkClient {
         let url =  templateExample.exampleURL
         let request = URLRequest(url:url)
         let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
-            guard let meme = self.getMemes(data, memeName: templateExample.name) else { return }
+            guard let meme = self.getMeme(data, memeName: templateExample.name) else { return }
             completion(meme)
         }
         task.resume()

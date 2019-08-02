@@ -10,11 +10,8 @@
 		DC86C5B922F121C70013F362 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC86C5B822F121C70013F362 /* ViewModel.swift */; };
 		DCF4CD4422EFD816002B984B /* Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4322EFD816002B984B /* Meme.swift */; };
 		DCF4CD4622EFD991002B984B /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4522EFD991002B984B /* NetworkClient.swift */; };
-		DCF4CD4822EFDA10002B984B /* MemeParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4722EFDA10002B984B /* MemeParser.swift */; };
 		DCF4CD4A22EFDB97002B984B /* Template.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4922EFDB96002B984B /* Template.swift */; };
-		DCF4CD4C22EFDBD2002B984B /* TemplateParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4B22EFDBD2002B984B /* TemplateParser.swift */; };
 		DCF4CD4E22EFE1FB002B984B /* TemplateExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4D22EFE1FB002B984B /* TemplateExample.swift */; };
-		DCF4CD5022EFE22C002B984B /* TemplateExampleParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4F22EFE22C002B984B /* TemplateExampleParser.swift */; };
 		DCFF8F2F22E204A50031E950 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFF8F2E22E204A50031E950 /* AppDelegate.swift */; };
 		DCFF8F3122E204A50031E950 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFF8F3022E204A50031E950 /* ViewController.swift */; };
 		DCFF8F3622E204A70031E950 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCFF8F3522E204A70031E950 /* Assets.xcassets */; };
@@ -44,11 +41,8 @@
 		DC86C5B822F121C70013F362 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		DCF4CD4322EFD816002B984B /* Meme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meme.swift; sourceTree = "<group>"; };
 		DCF4CD4522EFD991002B984B /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
-		DCF4CD4722EFDA10002B984B /* MemeParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemeParser.swift; sourceTree = "<group>"; };
 		DCF4CD4922EFDB96002B984B /* Template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Template.swift; sourceTree = "<group>"; };
-		DCF4CD4B22EFDBD2002B984B /* TemplateParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateParser.swift; sourceTree = "<group>"; };
 		DCF4CD4D22EFE1FB002B984B /* TemplateExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateExample.swift; sourceTree = "<group>"; };
-		DCF4CD4F22EFE22C002B984B /* TemplateExampleParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateExampleParser.swift; sourceTree = "<group>"; };
 		DCFF8F2B22E204A50031E950 /* Meme.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Meme.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCFF8F2E22E204A50031E950 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DCFF8F3022E204A50031E950 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -91,9 +85,6 @@
 		DC86C5BA22F139650013F362 /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
-				DCF4CD4722EFDA10002B984B /* MemeParser.swift */,
-				DCF4CD4B22EFDBD2002B984B /* TemplateParser.swift */,
-				DCF4CD4F22EFE22C002B984B /* TemplateExampleParser.swift */,
 			);
 			path = Parsers;
 			sourceTree = "<group>";
@@ -294,14 +285,11 @@
 			files = (
 				DCF4CD4E22EFE1FB002B984B /* TemplateExample.swift in Sources */,
 				DCF4CD4422EFD816002B984B /* Meme.swift in Sources */,
-				DCF4CD4C22EFDBD2002B984B /* TemplateParser.swift in Sources */,
-				DCF4CD5022EFE22C002B984B /* TemplateExampleParser.swift in Sources */,
 				DCFF8F3122E204A50031E950 /* ViewController.swift in Sources */,
 				DC86C5B922F121C70013F362 /* ViewModel.swift in Sources */,
 				DCFF8F2F22E204A50031E950 /* AppDelegate.swift in Sources */,
 				DCF4CD4A22EFDB97002B984B /* Template.swift in Sources */,
 				DCF4CD4622EFD991002B984B /* NetworkClient.swift in Sources */,
-				DCF4CD4822EFDA10002B984B /* MemeParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

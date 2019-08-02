@@ -12,3 +12,16 @@ struct Template {
     let name: String
     let templateURL: URL
 }
+
+extension Template {
+    init?(dictionary: [String:Any]) {
+        guard let key = dictionary.keys.first,
+            let value = dictionary[key] as? String,
+            let templateURL = URL(string: value) else {
+                print("Error parsing data into Template model")
+                return nil
+        }
+        self.name = key
+        self.templateURL = templateURL
+    }
+}

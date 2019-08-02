@@ -15,10 +15,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let templateParser = TemplateParser()
-        let templateExampleParser = TemplateExampleParser()
-        let memeParser = MemeParser()
-        let networkClient = NetworkClient(templateParser: templateParser, memeParser: memeParser, templateExampleParser: templateExampleParser)
+        let networkClient = NetworkClient()
         let viewModel = ViewModel(networkClient: networkClient)
         let memeVC = ViewController(viewModel: viewModel)
         window = UIWindow(frame: UIScreen.main.bounds)

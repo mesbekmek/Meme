@@ -51,7 +51,8 @@ class NetworkClient {
 
     func requestTemplates(completion: @escaping ([Template]) -> Void)  {
         let session = URLSession.shared
-        let url =  URL(string: "https://memegen.link/api/templates")!
+        let urlBuilder = MemeEndpointBuilder()
+        let url = urlBuilder.endpointURL(.template)
         let request = URLRequest(url:url)
         let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
             guard let templates = self.getTemplates(data) else { return }
@@ -62,7 +63,8 @@ class NetworkClient {
 
     func requestTemplateExample(_ template: Template, completion: @escaping (TemplateExample) -> Void) {
         let session = URLSession.shared
-        let url =  template.templateURL
+        let urlBuilder = MemeEndpointBuilder()
+        let url = urlBuilder.endpointURL(.templateExample(templateURL: template.templateURL))
         let request = URLRequest(url:url)
         let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
             guard let templateExample = self.getTemplateExample(data) else { return }
@@ -73,7 +75,8 @@ class NetworkClient {
 
     func requestMeme(_ templateExample: TemplateExample, completion: @escaping (Meme) -> Void) {
         let session = URLSession.shared
-        let url =  templateExample.exampleURL
+        let urlBuilder = MemeEndpointBuilder()
+        let url = urlBuilder.endpointURL(.meme(templateExampleURL: templateExample.exampleURL))
         let request = URLRequest(url:url)
         let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
             guard let meme = self.getMeme(data, memeName: templateExample.name) else { return }
@@ -82,4 +85,26 @@ class NetworkClient {
         task.resume()
     }
 
+}
+
+enum MemeAPIEndpoint {
+    case template
+    case templateExample(templateURL: URL)
+    case meme(templateExampleURL: URL)
+}
+
+struct MemeEndpointBuilder {
+    private let baseURLString = "https://memegen.link/api/"
+
+    func endpointURL(_ type: MemeAPIEndpoint) -> URL {
+        let path: String
+        switch type {
+        case .template: path = "templates"
+            return URL(string: baseURLString + path)!
+        case .templateExample(let templateURL):
+            return templateURL
+        case .meme(let templateExampleURL):
+            return templateExampleURL
+        }
+    }
 }

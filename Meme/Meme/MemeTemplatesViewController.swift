@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  MemeTemplatesViewController.swift
 //  Meme
 //
 //  Created by Mesfin Bekele Mekonnen on 7/19/19.
@@ -8,11 +8,11 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class MemeTemplatesViewController: UIViewController {
 
-    let viewModel: ViewModel
+    let viewModel: TemplatesViewModel
     var memes = [Meme]()
-    init(viewModel: ViewModel) {
+    init(viewModel: TemplatesViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
@@ -25,20 +25,14 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         self.viewModel.requestTemplates { [weak self] templates in
             templates.forEach({ template in
-                self?.getTemplateExample(template)
+                self?.getMeme(template)
             })
         }
     }
 
-    func getTemplateExample(_ template: Template) {
-        self.viewModel.requestTemplateExample(template: template) { [weak self] templateExample in
-            self?.getMeme(templateExample)
-        }
-    }
-
-    func getMeme(_ templateExample: TemplateExample) {
-        self.viewModel.requestMeme(templateExample: templateExample) { [weak self] meme in
-            self?.memes.append(meme)
+    func getMeme(_ template: Template) {
+        if let meme = self.viewModel.getMeme(template: template) {
+            self.memes.append(meme)
         }
     }
 }

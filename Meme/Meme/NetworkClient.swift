@@ -12,20 +12,11 @@ class NetworkClient {
 
     fileprivate func getTemplates(_ data: Data?) -> [Template]? {
         guard let data = data,
-            let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:Any] else {
+            let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
                 print("Error deserializing template data");
                 return nil
         }
-
-        var templates = [Template]()
-        jsonResponse.forEach { (key, value) in
-            var dictionary = [String:Any]()
-            dictionary[key] = value
-            if let template = Template.init(dictionary: dictionary) {
-                templates.append(template)
-            }
-        }
-        return templates
+        return jsonResponse.compactMap({ return Template.init(name: $0.0, templateURL:URL(string: $0.1)!)})
     }
 
     func requestTemplates(completion: @escaping ([Template]) -> Void)  {
@@ -47,14 +38,13 @@ enum MemeAPIEndpoint {
 }
 
 struct MemeEndpointBuilder {
-    private let baseURLString = "https://memegen.link/api/"
     private let memegenDomain = "https://memegen.link/"
 
     func endpointURL(_ type: MemeAPIEndpoint) -> URL {
         let path: String
         switch type {
-        case .template: path = "templates"
-            return URL(string: baseURLString + path)!
+        case .template: path = "api" + "/" + "templates"
+            return URL(string: memegenDomain + path)!
         }
     }
 

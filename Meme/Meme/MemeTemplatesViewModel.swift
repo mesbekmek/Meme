@@ -19,9 +19,7 @@ struct MemeTemplatesViewModel: TemplatesViewModel {
      init(networkClient: NetworkClient) {
         self.networkClient = networkClient
     }
-}
 
-extension MemeTemplatesViewModel {
     func requestTemplates(completion: @escaping ([Template]) -> Void?) {
         self.networkClient.requestTemplates { templates in
             completion(templates)

@@ -23,15 +23,9 @@ class MemeTemplatesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.viewModel.requestTemplates { [weak self] templates in
-            let _ = templates.compactMap({return self?.getMeme($0)})
-            return nil
-        }
-    }
 
-    func getMeme(_ template: Template) {
-        if let meme = self.viewModel.getMeme(template: template) {
-            self.memes.append(meme)
+        self.viewModel.requestMemes { [weak self] memes in
+            self?.memes = memes
         }
     }
 }

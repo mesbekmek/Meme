@@ -80,13 +80,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		DC86C5BA22F139650013F362 /* Parsers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Parsers;
-			sourceTree = "<group>";
-		};
 		DC86C5BB22F1396F0013F362 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -124,7 +117,6 @@
 				DC86C5B822F121C70013F362 /* MemeTemplatesViewModel.swift */,
 				DCF4CD4522EFD991002B984B /* NetworkClient.swift */,
 				DC86C5BB22F1396F0013F362 /* Models */,
-				DC86C5BA22F139650013F362 /* Parsers */,
 				DCFF8F3522E204A70031E950 /* Assets.xcassets */,
 				DCFF8F3722E204A70031E950 /* LaunchScreen.storyboard */,
 				DCFF8F3A22E204A70031E950 /* Info.plist */,

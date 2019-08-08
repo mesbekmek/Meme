@@ -11,4 +11,15 @@ import Foundation
 struct Template {
     let name: String
     let templateURL: URL
+    let imageAlias: String?
+
+    init?(name: String, templateURLString: String) {
+        guard let url = URL(string: templateURLString) else {
+            print("Error parsing Template data model")
+            return nil
+        }
+        self.name = name
+        self.templateURL = url
+        self.imageAlias = self.templateURL.pathComponents.last
+    }
 }

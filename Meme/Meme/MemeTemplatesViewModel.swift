@@ -10,7 +10,7 @@ import Foundation
 
 protocol TemplatesViewModel {
     func requestTemplates(completion: @escaping ([Template]) -> Void?)
-    func getMeme(template: Template) -> Meme?
+    func requestMemes(completion: @escaping ([Meme]) -> Void?)
 }
 
 struct MemeTemplatesViewModel: TemplatesViewModel {
@@ -26,14 +26,11 @@ struct MemeTemplatesViewModel: TemplatesViewModel {
         }
     }
 
-    func getMeme(template: Template) -> Meme? {
-        let urlBuilder = MemeEndpointBuilder()
-        guard let imageAlias = template.templateURL.pathComponents.last,
-            let  imageURL = urlBuilder.imageURL(with: imageAlias) else {
-                print("Error constructing Meme model")
-                return nil
+    func requestMemes(completion: @escaping ([Meme]) -> Void?) {
+        self.networkClient.requestMemes { memes in
+            if let memes = memes {
+                completion(memes)
+            }
         }
-
-        return Meme(name: template.name, imageURL: imageURL)
     }
 }

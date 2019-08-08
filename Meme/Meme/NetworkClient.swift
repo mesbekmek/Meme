@@ -8,15 +8,20 @@
 
 import Foundation
 
-class NetworkClient {
+protocol MemeClient {
+    func getMeme(from template: Template) -> Meme?
+}
 
+class NetworkClient: MemeClient {
+
+    private var memes = [Meme]()
     fileprivate func getTemplates(_ data: Data?) -> [Template]? {
         guard let data = data,
             let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
                 print("Error deserializing template data");
                 return nil
         }
-        return jsonResponse.compactMap({ return Template.init(name: $0.0, templateURL:URL(string: $0.1)!)})
+        return jsonResponse.compactMap({ return Template.init(name: $0.0, templateURLString: $0.1)})
     }
 
     func requestTemplates(completion: @escaping ([Template]) -> Void)  {
@@ -24,13 +29,39 @@ class NetworkClient {
         let urlBuilder = MemeEndpointBuilder()
         let url = urlBuilder.endpointURL(.template)
         let request = URLRequest(url:url)
-        let task: URLSessionDataTask =  session.dataTask(with: request) { (data, response, error) -> Void in
+        let task: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) -> Void in
             guard let templates = self.getTemplates(data) else { return }
             completion(templates)
         }
         task.resume()
     }
 
+    func requestMemes(completion: @escaping ([Meme]?) -> Void) {
+        requestTemplates { [weak self] templates in
+            templates.forEach({ [weak self] template in
+                if let meme = self?.getMeme(from: template) {
+                    self?.memes.append(meme)
+                }
+            })
+
+            if let count = self?.memes.count {
+                if count > 0 {
+                    completion(self?.memes)
+                }
+            }
+        }
+    }
+
+    func getMeme(from template: Template) -> Meme? {
+        let urlBuilder = MemeEndpointBuilder()
+        guard let imageAlias = template.imageAlias,
+            let  imageURL = urlBuilder.imageURL(with: imageAlias) else {
+                print("Error constructing Meme model")
+                return nil
+        }
+
+        return Meme(name: template.name, imageURL: imageURL)
+    }
 }
 
 enum MemeAPIEndpoint {

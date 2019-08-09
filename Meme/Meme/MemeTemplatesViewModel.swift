@@ -10,7 +10,7 @@ import Foundation
 
 protocol TemplatesViewModel {
     func requestTemplates(completion: @escaping ([Template]) -> Void?)
-    func requestMemes(completion: @escaping ([Meme]) -> Void?)
+    func requestMemes(completion: @escaping ([Meme]) -> Void)
 }
 
 struct MemeTemplatesViewModel: TemplatesViewModel {
@@ -26,7 +26,7 @@ struct MemeTemplatesViewModel: TemplatesViewModel {
         }
     }
 
-    func requestMemes(completion: @escaping ([Meme]) -> Void?) {
+    func requestMemes(completion: @escaping ([Meme]) -> Void) {
         self.networkClient.requestMemes { memes in
             if let memes = memes {
                 completion(memes)

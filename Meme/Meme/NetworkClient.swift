@@ -14,7 +14,6 @@ protocol MemeClient {
 
 class NetworkClient: MemeClient {
 
-    private var memes = [Meme]()
     fileprivate func getTemplates(_ data: Data?) -> [Template]? {
         guard let data = data,
             let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
@@ -38,17 +37,7 @@ class NetworkClient: MemeClient {
 
     func requestMemes(completion: @escaping ([Meme]?) -> Void) {
         requestTemplates { [weak self] templates in
-            templates.forEach({ [weak self] template in
-                if let meme = self?.getMeme(from: template) {
-                    self?.memes.append(meme)
-                }
-            })
-
-            if let count = self?.memes.count {
-                if count > 0 {
-                    completion(self?.memes)
-                }
-            }
+            completion(templates.compactMap({ return self?.getMeme(from: $0)}))
         }
     }
 

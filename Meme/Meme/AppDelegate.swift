@@ -15,7 +15,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let memeVC = ViewController()
+        let networkClient = NetworkClient()
+        let viewModel = MemeTemplatesViewModel(networkClient: networkClient)
+        let memeVC = MemeTemplatesViewController(viewModel: viewModel)
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = memeVC
         window?.makeKeyAndVisible()

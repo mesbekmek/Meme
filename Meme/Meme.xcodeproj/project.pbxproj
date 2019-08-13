@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		DC86C5B922F121C70013F362 /* MemeTemplatesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC86C5B822F121C70013F362 /* MemeTemplatesViewModel.swift */; };
-		DCF4CD4422EFD816002B984B /* Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4322EFD816002B984B /* Meme.swift */; };
 		DCF4CD4622EFD991002B984B /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4522EFD991002B984B /* NetworkClient.swift */; };
 		DCF4CD4A22EFDB97002B984B /* Template.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF4CD4922EFDB96002B984B /* Template.swift */; };
 		DCFF8F2F22E204A50031E950 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCFF8F2E22E204A50031E950 /* AppDelegate.swift */; };
@@ -38,7 +37,6 @@
 
 /* Begin PBXFileReference section */
 		DC86C5B822F121C70013F362 /* MemeTemplatesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemeTemplatesViewModel.swift; sourceTree = "<group>"; };
-		DCF4CD4322EFD816002B984B /* Meme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meme.swift; sourceTree = "<group>"; };
 		DCF4CD4522EFD991002B984B /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
 		DCF4CD4922EFDB96002B984B /* Template.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Template.swift; sourceTree = "<group>"; };
 		DCFF8F2B22E204A50031E950 /* Meme.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Meme.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -84,7 +82,6 @@
 			isa = PBXGroup;
 			children = (
 				DCF4CD4922EFDB96002B984B /* Template.swift */,
-				DCF4CD4322EFD816002B984B /* Meme.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -272,7 +269,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DCF4CD4422EFD816002B984B /* Meme.swift in Sources */,
 				DCFF8F3122E204A50031E950 /* MemeTemplatesViewController.swift in Sources */,
 				DC86C5B922F121C70013F362 /* MemeTemplatesViewModel.swift in Sources */,
 				DCFF8F2F22E204A50031E950 /* AppDelegate.swift in Sources */,

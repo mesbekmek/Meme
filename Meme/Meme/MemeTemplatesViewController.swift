@@ -11,7 +11,7 @@ import UIKit
 class MemeTemplatesViewController: UIViewController {
 
     let viewModel: TemplatesViewModel
-    var memes = [Meme]()
+    var templates = [Template]()
     init(viewModel: TemplatesViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -24,8 +24,13 @@ class MemeTemplatesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.viewModel.requestMemes { [weak self] memes in
-            self?.memes = memes
+        self.viewModel.requestTemplates { [weak self] result in
+            switch result {
+            case .success(let templates):
+                self?.templates = templates
+            case .failure(let error):
+                print("Error requesting memes \(error.localizedDescription)")
+            }
         }
     }
 }

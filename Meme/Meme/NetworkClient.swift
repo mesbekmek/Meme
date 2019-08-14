@@ -8,35 +8,60 @@
 
 import Foundation
 
-protocol TemplateClient {
-    func getTemplates(_ data: Data) -> Result<[Template], RetrievalError>
-}
+class NetworkClient {
 
-class NetworkClient: TemplateClient {
-
-    func requestTemplates(completion: @escaping (Result<[Template], RetrievalError>) -> Void)  {
+    func requestTemplates(completion: @escaping (Result<[Template], Error>) -> Void)  {
         let session = URLSession.shared
         let urlBuilder = MemeEndpointBuilder()
         let url = urlBuilder.endpointURL(.template)
         let request = URLRequest(url:url)
-        let task: URLSessionDataTask = session.dataTask(with: request) { [weak self] (data, response, error) -> Void in
-            guard let data = data,
-                let result = self?.getTemplates(data) else {
-                    print("Error getting templates template data")
-                    return
+        let task: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) -> Void in
+            guard let data = data else {
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    if let responseError = (response as? HTTPURLResponse)?.apiError {
+                        completion(.failure(responseError))
+                    }
+                }
+                return
             }
-            completion(result)
+
+            guard let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
+                 let deserializationError = RetrievalError.deserializationFailure
+                    completion(.failure(deserializationError))
+                return
+            }
+            completion(.success(jsonResponse.compactMap({ return Template(name: $0.0, templateURLString: $0.1)})))
         }
         task.resume()
     }
+}
 
-    func getTemplates(_ data: Data) -> Result<[Template], RetrievalError> {
-        guard let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
-            print("Error deserializing template data")
-            return .failure(.deserializationFailure)
+extension HTTPURLResponse {
+    var apiError: NetworkError? {
+        switch statusCode {
+        case 100...199:
+            return .networkError
+        case 200...299:
+            return nil
+        case 300...399:
+            return .redirectionError
+        case 400...499:
+            return .clientError
+        case 500...599:
+            return .serverError
+        default:
+            return nil
         }
-        return .success(jsonResponse.compactMap({ return Template(name: $0.0, templateURLString: $0.1)}))
     }
+}
+
+enum NetworkError: Error {
+    case networkError
+    case redirectionError
+    case clientError
+    case serverError
 }
 
 enum RetrievalError: Error {

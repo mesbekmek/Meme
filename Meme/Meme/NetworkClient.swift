@@ -35,7 +35,7 @@ class NetworkClient: TemplateClient {
             print("Error deserializing template data")
             return .failure(.deserializationFailure)
         }
-        return .success(jsonResponse.compactMap({ return Template.init(name: $0.0, templateURLString: $0.1)}))
+        return .success(jsonResponse.compactMap({ return Template(name: $0.0, templateURLString: $0.1)}))
     }
 }
 

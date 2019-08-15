@@ -9,7 +9,7 @@
 import Foundation
 
 protocol TemplatesViewModel {
-    func requestTemplates(completion: @escaping (Result<[Template], Error>) -> Void)
+    func requestTemplates(completion: @escaping (Result<[Template], MemeClientError>) -> Void)
 }
 
 struct MemeTemplatesViewModel: TemplatesViewModel {
@@ -19,7 +19,7 @@ struct MemeTemplatesViewModel: TemplatesViewModel {
         self.networkClient = networkClient
     }
 
-    func requestTemplates(completion: @escaping (Result<[Template], Error>) -> Void) {
+    func requestTemplates(completion: @escaping (Result<[Template], MemeClientError>) -> Void) {
         self.networkClient.requestTemplates { result in
             switch result {
             case .success(let templates):

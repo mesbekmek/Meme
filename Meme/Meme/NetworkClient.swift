@@ -10,14 +10,14 @@ import Foundation
 
 class NetworkClient {
 
-    func requestTemplates(completion: @escaping (Result<[Template], Error>) -> Void)  {
+    func requestTemplates(completion: @escaping (Result<[Template], MemeClientError>) -> Void)  {
         let session = URLSession.shared
         let urlBuilder = MemeEndpointBuilder()
         let url = urlBuilder.endpointURL(.template)
         let request = URLRequest(url:url)
         let task: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) -> Void in
             guard let data = data else {
-                if let error = error {
+                if let error = error as? MemeClientError {
                     completion(.failure(error))
                 } else {
                     let responseError = (response as? HTTPURLResponse)?.apiError ?? .unknownError

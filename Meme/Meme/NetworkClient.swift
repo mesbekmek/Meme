@@ -8,49 +8,59 @@
 
 import Foundation
 
-protocol MemeClient {
-    func getMeme(from template: Template) -> Meme?
-}
+class NetworkClient {
 
-class NetworkClient: MemeClient {
-
-    fileprivate func getTemplates(_ data: Data?) -> [Template]? {
-        guard let data = data,
-            let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
-                print("Error deserializing template data");
-                return nil
-        }
-        return jsonResponse.compactMap({ return Template.init(name: $0.0, templateURLString: $0.1)})
-    }
-
-    func requestTemplates(completion: @escaping ([Template]) -> Void)  {
+    func requestTemplates(completion: @escaping (Result<[Template], MemeClientError>) -> Void)  {
         let session = URLSession.shared
         let urlBuilder = MemeEndpointBuilder()
         let url = urlBuilder.endpointURL(.template)
         let request = URLRequest(url:url)
         let task: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) -> Void in
-            guard let templates = self.getTemplates(data) else { return }
-            completion(templates)
+            guard let data = data else {
+                if let error = error as? MemeClientError {
+                    completion(.failure(error))
+                } else {
+                    let responseError = (response as? HTTPURLResponse)?.apiError ?? .unknownError
+                    completion(.failure(responseError))
+                }
+                return
+            }
+
+            guard let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
+                completion(.failure(MemeClientError.jsonDeserializationError))
+                return
+            }
+            completion(.success(jsonResponse.compactMap({ return Template(name: $0.0, templateURLString: $0.1)})))
         }
         task.resume()
     }
+}
 
-    func requestMemes(completion: @escaping ([Meme]?) -> Void) {
-        requestTemplates { [weak self] templates in
-            completion(templates.compactMap({ return self?.getMeme(from: $0)}))
+extension HTTPURLResponse {
+    var apiError: MemeClientError? {
+        switch statusCode {
+        case 100...199:
+            return .networkError
+        case 200...299:
+            return nil
+        case 300...399:
+            return nil
+        case 400...499:
+            return .clientError
+        case 500...599:
+            return .serverError
+        default:
+            return .unknownError
         }
     }
+}
 
-    func getMeme(from template: Template) -> Meme? {
-        let urlBuilder = MemeEndpointBuilder()
-        guard let imageAlias = template.imageAlias,
-            let  imageURL = urlBuilder.imageURL(with: imageAlias) else {
-                print("Error constructing Meme model")
-                return nil
-        }
-
-        return Meme(name: template.name, imageURL: imageURL)
-    }
+enum MemeClientError: Error {
+    case networkError
+    case clientError
+    case serverError
+    case jsonDeserializationError
+    case unknownError
 }
 
 enum MemeAPIEndpoint {
@@ -64,8 +74,9 @@ struct MemeEndpointBuilder {
         let path: String
         switch type {
         case .template: path = "api" + "/" + "templates"
-            return URL(string: memegenDomain + path)!
         }
+        return URL(string: memegenDomain + path)!
+
     }
 
     func imageURL(with id: String) -> URL? {

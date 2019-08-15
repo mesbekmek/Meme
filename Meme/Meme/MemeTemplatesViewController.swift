@@ -29,26 +29,36 @@ class MemeTemplatesViewController: UIViewController {
             case .success(let templates):
                 self?.templates = templates
             case .failure(let error):
-                switch error {
-                case .jsonDeserializationError:
-                    self?.presentAlert(with: "Error parsing JSON", actionTitle: "Okay", message: "Please try again later")
-                case .networkError:
-                    self?.presentAlert(with: "Network Error", actionTitle: "Okay", message: "Please try again later")
-                case .serverError:
-                    self?.presentAlert(with: "Server Error", actionTitle: "Okay", message: "Please try again later")
-                case .clientError:
-                    self?.presentAlert(with: "Client Error", actionTitle: "Okay", message: "Please try again later")
-                case .unknownError:
-                    self?.presentAlert(with: "Unkown Error", actionTitle: "Okay", message: "Uknown error occured, please try again later")
+                let alertController = UIAlertController.createAlertController(for: error)
+                DispatchQueue.main.async {
+                    self?.present(alertController, animated: true, completion: nil)
                 }
             }
         }
     }
+}
 
-    fileprivate func presentAlert(with title:String, actionTitle:String, message:String) {
+extension UIAlertController {
+
+    class func createAlertController(for error: MemeClientError) -> UIAlertController {
+        switch error {
+        case .jsonDeserializationError:
+            return createAlert(with: "Error parsing JSON", actionTitle: "Okay", message: "Please try again later")
+        case .networkError:
+            return createAlert(with: "Network Error", actionTitle: "Okay", message: "Please try again later")
+        case .serverError:
+            return createAlert(with: "Server Error", actionTitle: "Okay", message: "Please try again later")
+        case .clientError:
+            return createAlert(with: "Client Error", actionTitle: "Okay", message: "Please try again later")
+        case .unknownError:
+            return createAlert(with: "Unkown Error", actionTitle: "Okay", message: "Uknown error occured, please try again later")
+        }
+    }
+
+    class func createAlert(with title:String, actionTitle:String, message:String) -> UIAlertController {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let alertAction = UIAlertAction(title: actionTitle, style: .default, handler: nil)
         alertController.addAction(alertAction)
-        self.present(alertController, animated: true, completion: nil)
+        return alertController
     }
 }

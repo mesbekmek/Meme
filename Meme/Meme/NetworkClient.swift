@@ -20,16 +20,14 @@ class NetworkClient {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    if let responseError = (response as? HTTPURLResponse)?.apiError {
-                        completion(.failure(responseError))
-                    }
+                    let responseError = (response as? HTTPURLResponse)?.apiError ?? .unknownError
+                    completion(.failure(responseError))
                 }
                 return
             }
 
             guard let jsonResponse = try? JSONSerialization.jsonObject(with: data, options: []) as? [String:String] else {
-                 let deserializationError = RetrievalError.deserializationFailure
-                    completion(.failure(deserializationError))
+                completion(.failure(MemeClientError.jsonDeserializationError))
                 return
             }
             completion(.success(jsonResponse.compactMap({ return Template(name: $0.0, templateURLString: $0.1)})))
@@ -39,33 +37,30 @@ class NetworkClient {
 }
 
 extension HTTPURLResponse {
-    var apiError: NetworkError? {
+    var apiError: MemeClientError? {
         switch statusCode {
         case 100...199:
             return .networkError
         case 200...299:
             return nil
         case 300...399:
-            return .redirectionError
+            return nil
         case 400...499:
             return .clientError
         case 500...599:
             return .serverError
         default:
-            return nil
+            return .unknownError
         }
     }
 }
 
-enum NetworkError: Error {
+enum MemeClientError: Error {
     case networkError
-    case redirectionError
     case clientError
     case serverError
-}
-
-enum RetrievalError: Error {
-    case deserializationFailure
+    case jsonDeserializationError
+    case unknownError
 }
 
 enum MemeAPIEndpoint {
@@ -79,8 +74,9 @@ struct MemeEndpointBuilder {
         let path: String
         switch type {
         case .template: path = "api" + "/" + "templates"
-        return URL(string: memegenDomain + path)!
         }
+        return URL(string: memegenDomain + path)!
+
     }
 
     func imageURL(with id: String) -> URL? {

@@ -63,9 +63,12 @@ extension MemeTemplatesViewController : UITableViewDelegate, UITableViewDataSour
         let cell = self.tableView.dequeueReusableCell(withIdentifier: cellID) as! MemeTemplatesTableViewCell
         cell.memeImageView.image = nil
         if let imageURL = self.templates[indexPath.row].imageURL {
-            cell.memeImageView.load(url: imageURL) { image in
+            cell.memeImageView.load(url: imageURL) { [weak cell, weak tableView] image in
+                guard let visiblePaths = tableView?.indexPathsForVisibleRows,
+                    let cell = cell,
+                    visiblePaths.contains(indexPath) else { return }
                 cell.memeImageView.image = image
-                cell.setNeedsLayout()
+                cell.layoutIfNeeded()
             }
         }
         return cell

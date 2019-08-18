@@ -10,7 +10,7 @@ import UIKit
 
 class MemeTemplatesTableViewCell: UITableViewCell {
 
-    var memeImageView: UIImageView = {
+    lazy var memeImageView: UIImageView = {
         var imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.clipsToBounds = true
@@ -40,16 +40,14 @@ class MemeTemplatesTableViewCell: UITableViewCell {
 }
 
 extension UIImageView {
-
     func load(url: URL, completion: @escaping (UIImage) -> Void) {
         DispatchQueue.global().async {
-            if let data = try? Data(contentsOf: url) {
-                if let image = UIImage(data: data) {
+            if let data = try? Data(contentsOf: url),
+                 let image = UIImage(data: data) {
                     DispatchQueue.main.async {
                         completion(image)
                     }
                 }
             }
         }
-    }
 }

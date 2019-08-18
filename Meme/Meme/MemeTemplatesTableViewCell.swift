@@ -39,15 +39,38 @@ class MemeTemplatesTableViewCell: UITableViewCell {
     }
 }
 
+protocol ImageCaching {
+    func getImage(for url: URL) -> UIImage?
+    func setImage(image: UIImage, for url: URL)
+}
+
+class ImageCache: ImageCaching {
+    static let shared = ImageCache()
+    private var imageDictionary: [URL:UIImage] = [:]
+
+    func getImage(for url: URL) -> UIImage? {
+        return imageDictionary[url]
+    }
+
+    func setImage(image: UIImage, for url: URL) {
+        imageDictionary[url] = image
+    }
+}
+
 extension UIImageView {
     func load(url: URL, completion: @escaping (UIImage) -> Void) {
-        DispatchQueue.global().async {
-            if let data = try? Data(contentsOf: url),
-                 let image = UIImage(data: data) {
+        if let image = ImageCache.shared.getImage(for: url) {
+            completion(image)
+        } else {
+            DispatchQueue.global().async {
+                if let data = try? Data(contentsOf: url),
+                    let image = UIImage(data: data) {
+                    ImageCache.shared.setImage(image: image, for: url)
                     DispatchQueue.main.async {
                         completion(image)
                     }
                 }
             }
         }
+    }
 }

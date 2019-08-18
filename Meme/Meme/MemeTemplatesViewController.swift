@@ -17,9 +17,11 @@ class MemeTemplatesViewController: UIViewController {
         tableView.frame = self.view.bounds
         return tableView
     }()
-
-    var imageCache: [String: UIImage?] = [:]
-    var templates = [Template]()
+    var templates: [Template] = [] {
+        didSet {
+            DispatchQueue.main.async { self.tableView.reloadData() }
+        }
+    }
     init(viewModel: TemplatesViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -41,9 +43,6 @@ class MemeTemplatesViewController: UIViewController {
             switch result {
             case .success(let templates):
                 self?.templates = templates
-                DispatchQueue.main.async {
-                    self?.tableView.reloadData()
-                }
             case .failure(let error):
                 let alertController = UIAlertController.createAlertController(for: error)
                 DispatchQueue.main.async {
@@ -63,18 +62,10 @@ extension MemeTemplatesViewController : UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = self.tableView.dequeueReusableCell(withIdentifier: cellID) as! MemeTemplatesTableViewCell
         cell.memeImageView.image = nil
-
         if let imageURL = self.templates[indexPath.row].imageURL {
-            if let cachedImage = self.imageCache[imageURL.absoluteString] {
-                cell.memeImageView.image = cachedImage
-            } else {
-                cell.memeImageView.load(url: imageURL) { image in
-                    self.imageCache[imageURL.absoluteString] = image
-                    if let cellToUpdate = self.tableView.cellForRow(at: indexPath) as? MemeTemplatesTableViewCell {
-                        cellToUpdate.memeImageView.image = image
-                        cellToUpdate.setNeedsLayout()
-                    }
-                }
+            cell.memeImageView.load(url: imageURL) { image in
+                cell.memeImageView.image = image
+                cell.setNeedsLayout()
             }
         }
         return cell

@@ -18,6 +18,7 @@ class MemeTemplatesViewController: UIViewController {
         return tableView
     }()
 
+    var imageCache: [String: UIImage?] = [:]
     var templates = [Template]()
     init(viewModel: TemplatesViewModel) {
         self.viewModel = viewModel
@@ -62,11 +63,17 @@ extension MemeTemplatesViewController : UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = self.tableView.dequeueReusableCell(withIdentifier: cellID) as! MemeTemplatesTableViewCell
         cell.memeImageView.image = nil
+
         if let imageURL = self.templates[indexPath.row].imageURL {
-            cell.memeImageView.load(url: imageURL) { image in
-                if let cellToUpdate = self.tableView.cellForRow(at: indexPath) as? MemeTemplatesTableViewCell {
-                    cellToUpdate.memeImageView.image = image
-                    cellToUpdate.setNeedsLayout()
+            if let cachedImage = self.imageCache[imageURL.absoluteString] {
+                cell.memeImageView.image = cachedImage
+            } else {
+                cell.memeImageView.load(url: imageURL) { image in
+                    self.imageCache[imageURL.absoluteString] = image
+                    if let cellToUpdate = self.tableView.cellForRow(at: indexPath) as? MemeTemplatesTableViewCell {
+                        cellToUpdate.memeImageView.image = image
+                        cellToUpdate.setNeedsLayout()
+                    }
                 }
             }
         }

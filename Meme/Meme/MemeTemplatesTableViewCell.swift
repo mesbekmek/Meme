@@ -10,7 +10,6 @@ import UIKit
 
 class MemeTemplatesTableViewCell: UITableViewCell {
 
-    var memeImage: UIImage?
     var memeImageView: UIImageView = {
         var imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -36,9 +35,7 @@ class MemeTemplatesTableViewCell: UITableViewCell {
             memeImageView.topAnchor.constraint(equalTo: self.topAnchor),
             memeImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
             memeImageView.heightAnchor.constraint(equalToConstant: 250)
-            ]
-        )
-
+            ])
     }
 }
 

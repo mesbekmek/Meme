@@ -1,14 +1,14 @@
 //
-//  MemeTemplatesTableViewCell.swift
+//  MemeTemplatesCollectionViewCell.swift
 //  Meme
 //
-//  Created by Mesfin Bekele Mekonnen on 8/17/19.
+//  Created by Mesfin Bekele Mekonnen on 8/23/19.
 //  Copyright © 2019 Mesfin Bekele Mekonnen. All rights reserved.
 //
 
 import UIKit
 
-class MemeTemplatesTableViewCell: UITableViewCell {
+class MemeTemplatesCollectionViewCell: UICollectionViewCell {
 
     lazy var memeImageView: UIImageView = {
         var imageView = UIImageView()
@@ -18,9 +18,25 @@ class MemeTemplatesTableViewCell: UITableViewCell {
         return imageView
     }()
 
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.addSubview(memeImageView)
+    var maxHeightConstraint: NSLayoutConstraint! {
+        didSet {
+            maxHeightConstraint.isActive = false
+        }
+    }
+
+    var maxHeight: CGFloat? = nil {
+        didSet {
+            guard let maxHeight = maxHeight else {
+                return
+            }
+            maxHeightConstraint.isActive = true
+            maxHeightConstraint.constant = maxHeight
+        }
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(memeImageView)
         setupConstraints()
     }
 
@@ -29,12 +45,14 @@ class MemeTemplatesTableViewCell: UITableViewCell {
     }
 
     private func setupConstraints() {
+        let constraint = memeImageView.heightAnchor.constraint(lessThanOrEqualToConstant: 250)
+        self.maxHeightConstraint = constraint
         NSLayoutConstraint.activate([
             memeImageView.leftAnchor.constraint(equalTo: self.leftAnchor),
             memeImageView.rightAnchor.constraint(equalTo: self.rightAnchor),
             memeImageView.topAnchor.constraint(equalTo: self.topAnchor),
             memeImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            memeImageView.heightAnchor.constraint(equalToConstant: 250)
+            //self.maxHeightConstraint
             ])
     }
 }

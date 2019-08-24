@@ -16,12 +16,17 @@ protocol ImageCaching {
 class ImageCache: ImageCaching {
     static let shared = ImageCache()
     private var imageDictionary: [URL:UIImage] = [:]
+    private let lock = NSLock()
 
     func getImage(for url: URL) -> UIImage? {
         return imageDictionary[url]
     }
 
     func setImage(image: UIImage, for url: URL) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
         imageDictionary[url] = image
     }
 }

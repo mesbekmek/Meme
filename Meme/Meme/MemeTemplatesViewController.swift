@@ -19,28 +19,23 @@ class MemeTemplatesViewController: UIViewController {
     }()
 
     lazy var collectionView: UICollectionView = {
-        var collectionView = UICollectionView(frame: self.view.bounds, collectionViewLayout: MemeCollectionViewFlowLayout())
+        var collectionView = UICollectionView(frame: self.view.bounds,
+                                              collectionViewLayout: collectionViewLayout)
         return collectionView
     }()
 
-    var collectionViewLayout: UICollectionViewFlowLayout! {
-        didSet {
-            collectionViewLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        }
-    }
-
-    var collectionLayout: UICollectionViewFlowLayout? {
-        let collectionLayout = UICollectionViewFlowLayout()
-        collectionLayout.scrollDirection = .vertical
-        self.collectionViewLayout = collectionLayout
-        return collectionLayout
-    }
+    let collectionViewLayout = MemeCollectionViewFlowLayout()
 
     var templates: [Template] = [] {
         didSet {
             DispatchQueue.main.async { self.collectionView.reloadData() }
         }
     }
+    
+    var itemWidth: CGFloat {
+        return collectionView.frame.width - 16
+    }
+
     init(viewModel: TemplatesViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -63,6 +58,7 @@ class MemeTemplatesViewController: UIViewController {
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
         self.collectionView.register(MemeTemplatesCollectionViewCell.self, forCellWithReuseIdentifier: cellID)
+        self.collectionViewLayout.estimatedItemSize = CGSize(width: itemWidth, height: 200)
 
         self.viewModel.requestTemplates { [weak self] result in
             switch result {
@@ -85,29 +81,19 @@ extension MemeTemplatesViewController: UICollectionViewDataSource, UICollectionV
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! MemeTemplatesCollectionViewCell
-        cell.memeImageView.image = nil
+        
+        cell.maxWidth = itemWidth
+
         if let imageURL = self.templates[indexPath.row].imageURL {
-            cell.memeImageView.load(url: imageURL) { [weak cell, weak collectionView] image in
-                guard let visibleItems = collectionView?.indexPathsForVisibleItems,
-                let cell = cell,
-                visibleItems.contains(indexPath) else {
-                    print("I am returning nothingness")
-                    return
-                }
-                cell.memeImageView.image = image
-                cell.layoutIfNeeded()
-            }
+            cell.memeImageView.imageURL = imageURL
+//            cell.memeImageView.load(url: imageURL, immediate: { image in
+//                cell.memeImageView.image = image
+//                cell.layoutIfNeeded()
+//            }) { [weak collectionView] _ in
+//                collectionView?
+//            }
         }
         return cell
-    }
-
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.width, height: 250)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let cell = cell as? MemeTemplatesCollectionViewCell else { return }
-        cell.memeImageView.image = nil
     }
 }
 
@@ -121,32 +107,32 @@ class MemeCollectionViewFlowLayout: UICollectionViewFlowLayout {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        return true
-    }
+//    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+//        return true
+//    }
 }
 
-extension MemeTemplatesViewController : UITableViewDelegate, UITableViewDataSource {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.templates.count
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: cellID) as! MemeTemplatesTableViewCell
-        cell.memeImageView.image = nil
-        if let imageURL = self.templates[indexPath.row].imageURL {
-            cell.memeImageView.load(url: imageURL) { [weak cell, weak tableView] image in
-                guard let visiblePaths = tableView?.indexPathsForVisibleRows,
-                    let cell = cell,
-                    visiblePaths.contains(indexPath) else { return }
-                cell.memeImageView.image = image
-                cell.layoutIfNeeded()
-            }
-        }
-        return cell
-    }
-}
+//extension MemeTemplatesViewController : UITableViewDelegate, UITableViewDataSource {
+//
+//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        return self.templates.count
+//    }
+//
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = self.tableView.dequeueReusableCell(withIdentifier: cellID) as! MemeTemplatesTableViewCell
+//        cell.memeImageView.image = nil
+//        if let imageURL = self.templates[indexPath.row].imageURL {
+//            cell.memeImageView.load(url: imageURL) { [weak cell, weak tableView] image in
+//                guard let visiblePaths = tableView?.indexPathsForVisibleRows,
+//                    let cell = cell,
+//                    visiblePaths.contains(indexPath) else { return }
+//                cell.memeImageView.image = image
+//                cell.layoutIfNeeded()
+//            }
+//        }
+//        return cell
+//    }
+//}
 
 extension UIAlertController {
 

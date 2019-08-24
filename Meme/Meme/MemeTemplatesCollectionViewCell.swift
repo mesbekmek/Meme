@@ -10,33 +10,33 @@ import UIKit
 
 class MemeTemplatesCollectionViewCell: UICollectionViewCell {
 
-    lazy var memeImageView: UIImageView = {
-        var imageView = UIImageView()
+    lazy var memeImageView: AsyncImageView = {
+        var imageView = AsyncImageView()
+        imageView.onImageSet = { [weak self] in self?.layoutIfNeeded() }
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.clipsToBounds = true
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
 
-    var maxHeightConstraint: NSLayoutConstraint! {
+    var maxWidthConstraint: NSLayoutConstraint! {
         didSet {
-            maxHeightConstraint.isActive = false
+            maxWidthConstraint.isActive = false
         }
     }
 
-    var maxHeight: CGFloat? = nil {
+    var maxWidth: CGFloat? = nil {
         didSet {
-            guard let maxHeight = maxHeight else {
+            guard let maxWidth = maxWidth else {
                 return
             }
-            maxHeightConstraint.isActive = true
-            maxHeightConstraint.constant = maxHeight
+            maxWidthConstraint.isActive = true
+            maxWidthConstraint.constant = maxWidth
         }
     }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addSubview(memeImageView)
         setupConstraints()
     }
 
@@ -45,14 +45,80 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
     }
 
     private func setupConstraints() {
-        let constraint = memeImageView.heightAnchor.constraint(lessThanOrEqualToConstant: 250)
-        self.maxHeightConstraint = constraint
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
-            memeImageView.leftAnchor.constraint(equalTo: self.leftAnchor),
-            memeImageView.rightAnchor.constraint(equalTo: self.rightAnchor),
-            memeImageView.topAnchor.constraint(equalTo: self.topAnchor),
-            memeImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            contentView.leftAnchor.constraint(equalTo: leftAnchor),
+            contentView.rightAnchor.constraint(equalTo: rightAnchor),
+            contentView.topAnchor.constraint(equalTo: topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            ])
+        
+        self.maxWidthConstraint = contentView.widthAnchor.constraint(equalToConstant: 0)
+        self.maxWidthConstraint.priority = .required
+        
+        contentView.addSubview(memeImageView)
+
+        NSLayoutConstraint.activate([
+            memeImageView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
+            memeImageView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+            memeImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            memeImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            memeImageView.heightAnchor.constraint(greaterThanOrEqualToConstant: CGFloat.leastNonzeroMagnitude)
             //self.maxHeightConstraint
             ])
+    }
+    
+    override func prepareForReuse() {
+        memeImageView.image = nil
+        super.prepareForReuse()
+    }
+}
+
+class ScaledHeightImageView: UIImageView {
+    
+    override var intrinsicContentSize: CGSize {
+        
+        if let myImage = self.image {
+            let myImageWidth = myImage.size.width
+            let myImageHeight = myImage.size.height
+            let myViewWidth = self.frame.size.width
+            
+            let ratio = myViewWidth/myImageWidth
+            let scaledHeight = myImageHeight * ratio
+            
+            return CGSize(width: myViewWidth, height: scaledHeight)
+        }
+        
+        return CGSize(width: -1.0, height: -1.0)
+    }
+    
+}
+
+class AsyncImageView: ScaledHeightImageView {
+    var imageURL: URL? {
+        didSet {
+            if let url = imageURL {
+                loadWithURL(url)
+            }
+        }
+    }
+    
+    var onImageSet: (() -> Void)?
+    
+    override var image: UIImage? {
+        didSet {
+            onImageSet?()
+        }
+    }
+    
+    private func loadWithURL(_ url: URL) {
+        self.load(url: url, immediate: { image in
+            self.image = image
+        }) { [weak self] image in
+            if self?.imageURL == url {
+                self?.image = image
+            }
+        }
     }
 }

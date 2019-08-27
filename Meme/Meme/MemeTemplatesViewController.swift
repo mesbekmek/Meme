@@ -58,7 +58,7 @@ class MemeTemplatesViewController: UIViewController {
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
         self.collectionView.register(MemeTemplatesCollectionViewCell.self, forCellWithReuseIdentifier: cellID)
-        self.collectionViewLayout.estimatedItemSize = CGSize(width: itemWidth, height: 200)
+        self.collectionViewLayout.estimatedItemSize = CGSize(width: itemWidth, height: 250)
 
         self.viewModel.requestTemplates { [weak self] result in
             switch result {
@@ -107,9 +107,9 @@ class MemeCollectionViewFlowLayout: UICollectionViewFlowLayout {
         fatalError("init(coder:) has not been implemented")
     }
 
-//    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-//        return true
-//    }
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        return true
+    }
 }
 
 //extension MemeTemplatesViewController : UITableViewDelegate, UITableViewDataSource {

@@ -28,18 +28,24 @@ class MemeTemplatesViewController: UIViewController {
 
     var templates: [Template] = [] {
         didSet {
-            DispatchQueue.main.async { self.collectionView.reloadData() }
+            DispatchQueue.main.async {
+                self.collectionView.collectionViewLayout.invalidateLayout()
+                self.collectionView.reloadData()
+
+            }
         }
     }
     
     var itemWidth: CGFloat {
-        return collectionView.frame.width - 16
+        return collectionView.frame.width - 2 * spacing
     }
+
+    private let spacing: CGFloat = 8
 
     init(viewModel: TemplatesViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        //self.view.addSubview(self.tableView)
+        collectionViewLayout.minimumInteritemSpacing = spacing
         self.view.addSubview(self.collectionView)
     }
 
@@ -49,11 +55,6 @@ class MemeTemplatesViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        //        self.tableView.delegate = self
-        //        self.tableView.dataSource = self
-        //        self.tableView.register(MemeTemplatesTableViewCell.self, forCellReuseIdentifier: cellID)
-        //        self.tableView.rowHeight = UITableView.automaticDimension
-        //        self.tableView.estimatedRowHeight = 250
 
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
@@ -72,26 +73,31 @@ class MemeTemplatesViewController: UIViewController {
             }
         }
     }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
 }
 
 extension MemeTemplatesViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        collectionView.layoutIfNeeded()
         return templates.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        collectionView.layoutIfNeeded()
         let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! MemeTemplatesCollectionViewCell
-        
+
         cell.maxWidth = itemWidth
+        cell.onAsyncLoad = { [weak self] in
+            self?.collectionViewLayout
+                .invalidateLayout()
+        }
 
         if let imageURL = self.templates[indexPath.row].imageURL {
             cell.memeImageView.imageURL = imageURL
-//            cell.memeImageView.load(url: imageURL, immediate: { image in
-//                cell.memeImageView.image = image
-//                cell.layoutIfNeeded()
-//            }) { [weak collectionView] _ in
-//                collectionView?
-//            }
         }
         return cell
     }
@@ -111,28 +117,6 @@ class MemeCollectionViewFlowLayout: UICollectionViewFlowLayout {
         return true
     }
 }
-
-//extension MemeTemplatesViewController : UITableViewDelegate, UITableViewDataSource {
-//
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return self.templates.count
-//    }
-//
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = self.tableView.dequeueReusableCell(withIdentifier: cellID) as! MemeTemplatesTableViewCell
-//        cell.memeImageView.image = nil
-//        if let imageURL = self.templates[indexPath.row].imageURL {
-//            cell.memeImageView.load(url: imageURL) { [weak cell, weak tableView] image in
-//                guard let visiblePaths = tableView?.indexPathsForVisibleRows,
-//                    let cell = cell,
-//                    visiblePaths.contains(indexPath) else { return }
-//                cell.memeImageView.image = image
-//                cell.layoutIfNeeded()
-//            }
-//        }
-//        return cell
-//    }
-//}
 
 extension UIAlertController {
 

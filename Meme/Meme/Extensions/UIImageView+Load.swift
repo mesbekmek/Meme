@@ -27,10 +27,12 @@ extension UIImageView {
     
     func load(url: URL,
               immediate: (UIImage) -> Void,
+              placeholder: UIImage,
               completion: @escaping (UIImage) -> Void) {
         if let image = ImageCache.shared.getImage(for: url) {
             immediate(image)
         } else {
+            immediate(placeholder)
             DispatchQueue.global().async {
                 if let data = try? Data(contentsOf: url),
                     let image = UIImage(data: data) {

@@ -16,7 +16,7 @@ protocol ImageCaching {
 class ImageCache: ImageCaching {
     static let shared = ImageCache()
     private var imageDictionary: [URL:UIImage] = [:]
-    private let lock = NSLock()
+    private let lock = NSRecursiveLock()
 
     func getImage(for url: URL) -> UIImage? {
         return imageDictionary[url]

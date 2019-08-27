@@ -12,9 +12,11 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
 
     lazy var memeImageView: AsyncImageView = {
         var imageView = AsyncImageView()
-        imageView.onImageSet = { [weak self] in self?.layoutIfNeeded() }
+        imageView.onAsyncImageSet = { [weak self] in self?.updateLayout() }
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.clipsToBounds = true
+        imageView.layer.masksToBounds = true
+        imageView.image = UIImage(named: "placeholder")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -32,8 +34,11 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
             }
             maxWidthConstraint.isActive = true
             maxWidthConstraint.constant = maxWidth
+            self.layoutIfNeeded()
         }
     }
+
+    var onAsyncLoad: (() -> Void)?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -46,17 +51,18 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
 
     private func setupConstraints() {
         contentView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         NSLayoutConstraint.activate([
             contentView.leftAnchor.constraint(equalTo: leftAnchor),
             contentView.rightAnchor.constraint(equalTo: rightAnchor),
             contentView.topAnchor.constraint(equalTo: topAnchor),
             contentView.bottomAnchor.constraint(equalTo: bottomAnchor),
             ])
-        
+
         self.maxWidthConstraint = contentView.widthAnchor.constraint(equalToConstant: 0)
         self.maxWidthConstraint.priority = .required
-        
+        self.maxWidthConstraint.isActive = true
+
         contentView.addSubview(memeImageView)
 
         NSLayoutConstraint.activate([
@@ -65,34 +71,38 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
             memeImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             memeImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             memeImageView.heightAnchor.constraint(greaterThanOrEqualToConstant: CGFloat.leastNonzeroMagnitude)
-            //self.maxHeightConstraint
             ])
     }
-    
+
+    private func updateLayout() {
+        onAsyncLoad?()
+        layoutIfNeeded()
+    }
+
     override func prepareForReuse() {
-        memeImageView.image = nil
+        memeImageView.image = UIImage(named: "placeholder")
         super.prepareForReuse()
     }
 }
 
 class ScaledHeightImageView: UIImageView {
-    
+
     override var intrinsicContentSize: CGSize {
-        
+
         if let myImage = self.image {
             let myImageWidth = myImage.size.width
             let myImageHeight = myImage.size.height
             let myViewWidth = self.frame.size.width
-            
+
             let ratio = myViewWidth/myImageWidth
             let scaledHeight = myImageHeight * ratio
-            
+
             return CGSize(width: myViewWidth, height: scaledHeight)
         }
-        
+
         return CGSize(width: -1.0, height: -1.0)
     }
-    
+
 }
 
 class AsyncImageView: ScaledHeightImageView {
@@ -103,22 +113,22 @@ class AsyncImageView: ScaledHeightImageView {
             }
         }
     }
-    
-    var onImageSet: (() -> Void)?
-    
-    override var image: UIImage? {
-        didSet {
-            onImageSet?()
-        }
-    }
-    
+
+    var onAsyncImageSet: (() -> Void)?
+
     private func loadWithURL(_ url: URL) {
-        self.load(url: url, immediate: { image in
-            self.image = image
-        }) { [weak self] image in
-            if self?.imageURL == url {
-                self?.image = image
-            }
+        self.load(url: url,
+                  immediate: { [weak self] image in
+                    self?.image = image
+                    self?.setNeedsLayout()
+                    self?.layoutIfNeeded()
+
+            },
+                  placeholder: UIImage(named: "placeholder")!) { [weak self] image in
+                    if self?.imageURL == url {
+                        self?.onAsyncImageSet?()
+                        self?.image = image
+                    }
         }
     }
 }

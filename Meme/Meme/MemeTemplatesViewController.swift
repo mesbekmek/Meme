@@ -80,6 +80,18 @@ class MemeTemplatesViewController: UIViewController {
     }
 }
 
+extension MemeTemplatesViewController: UICollectionViewDataSourcePrefetching {
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        let imageURLs = indexPaths.compactMap { templates[$0.row].imageURL }
+        for url in imageURLs { AsyncFetcher.shared.fetchAsync(url, completion: nil) }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cancelPrefetchingForItemsAt indexPaths: [IndexPath]) {
+        let imageURLs = indexPaths.compactMap { templates[$0.row].imageURL }
+        for url in imageURLs { AsyncFetcher.shared.cancelFetch(url) }
+    }
+}
+
 extension MemeTemplatesViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         collectionView.layoutIfNeeded()

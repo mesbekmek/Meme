@@ -40,6 +40,8 @@ class MemeTemplatesViewController: UIViewController {
         return collectionView.frame.width - 2 * spacing
     }
 
+    var sizing = [IndexPath: CGSize]()
+
     private let spacing: CGFloat = 8
 
     init(viewModel: TemplatesViewModel) {
@@ -112,6 +114,35 @@ extension MemeTemplatesViewController: UICollectionViewDataSource, UICollectionV
             cell.memeImageView.imageURL = imageURL
         }
         return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if let size = sizing[indexPath] {
+            return size
+        }
+
+        let sizingCell = MemeTemplatesCollectionViewCell.sizingCell
+        sizingCell.prepareForReuse()
+
+        sizingCell.maxWidth = itemWidth
+        if let imageURL = self.templates[indexPath.row].imageURL {
+            print("setting url: \(imageURL)")
+            sizingCell.memeImageView.imageURL = imageURL
+        }
+
+        print("setneedslayout")
+        sizingCell.contentView.setNeedsLayout()
+        print("layoutifneeded")
+        sizingCell.contentView.layoutIfNeeded()
+
+        let size = sizingCell.contentView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        print("size: \(size)")
+
+        if sizingCell.memeImageView.didLoad {
+            sizing[indexPath] = size
+        }
+
+        return size
     }
 }
 

@@ -45,6 +45,7 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
         setupConstraints()
     }
 
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -76,11 +77,10 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
 
     private func updateLayout() {
         onAsyncLoad?()
-        layoutIfNeeded()
     }
 
     override func prepareForReuse() {
-        memeImageView.image = UIImage(named: "placeholder")
+        memeImageView.image = nil
         super.prepareForReuse()
     }
 }
@@ -100,7 +100,7 @@ class ScaledHeightImageView: UIImageView {
             return CGSize(width: myViewWidth, height: scaledHeight)
         }
 
-        return CGSize(width: -1.0, height: -1.0)
+        return CGSize(width: CGFloat.leastNormalMagnitude, height: CGFloat.leastNormalMagnitude)
     }
 
 }
@@ -117,18 +117,19 @@ class AsyncImageView: ScaledHeightImageView {
     var onAsyncImageSet: (() -> Void)?
 
     private func loadWithURL(_ url: URL) {
-        self.load(url: url,
-                  immediate: { [weak self] image in
-                    self?.image = image
-                    self?.setNeedsLayout()
-                    self?.layoutIfNeeded()
-
-            },
-                  placeholder: UIImage(named: "placeholder")!) { [weak self] image in
+        if let image = AsyncFetcher.shared.fetchedData(for: url) {
+                self.image = image
+        } else {
+            self.image = UIImage(named: "placeholder")
+            self.layoutIfNeeded()
+            AsyncFetcher.shared.fetchAsync(url) { [weak self] image in
+                DispatchQueue.main.async {
                     if self?.imageURL == url {
-                        self?.onAsyncImageSet?()
                         self?.image = image
+                        self?.onAsyncImageSet?()
                     }
+                }
+            }
         }
     }
 }

@@ -10,22 +10,19 @@ import UIKit
 
 class MemeTemplatesCollectionViewCell: UICollectionViewCell {
 
+    static let sizingCell = MemeTemplatesCollectionViewCell(frame: .zero)
+
     lazy var memeImageView: AsyncImageView = {
         var imageView = AsyncImageView()
         imageView.onAsyncImageSet = { [weak self] in self?.updateLayout() }
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.clipsToBounds = true
         imageView.layer.masksToBounds = true
-        imageView.image = UIImage(named: "placeholder")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
 
-    var maxWidthConstraint: NSLayoutConstraint! {
-        didSet {
-            maxWidthConstraint.isActive = false
-        }
-    }
+    var maxWidthConstraint: NSLayoutConstraint!
 
     var maxWidth: CGFloat? = nil {
         didSet {
@@ -34,7 +31,9 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
             }
             maxWidthConstraint.isActive = true
             maxWidthConstraint.constant = maxWidth
-            self.layoutIfNeeded()
+            memeImageView.maxWidth = maxWidth
+            self.contentView.setNeedsLayout()
+            self.contentView.layoutIfNeeded()
         }
     }
 
@@ -67,11 +66,10 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(memeImageView)
 
         NSLayoutConstraint.activate([
-            memeImageView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-            memeImageView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+            memeImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            memeImageView.widthAnchor.constraint(equalTo: contentView.widthAnchor),
             memeImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
             memeImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            memeImageView.heightAnchor.constraint(greaterThanOrEqualToConstant: CGFloat.leastNonzeroMagnitude)
             ])
     }
 
@@ -80,19 +78,23 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
     }
 
     override func prepareForReuse() {
-        memeImageView.image = nil
         super.prepareForReuse()
+        memeImageView.prepareForReuse()
     }
 }
 
 class ScaledHeightImageView: UIImageView {
 
+    var maxWidth: CGFloat = 0
+
     override var intrinsicContentSize: CGSize {
+        print("calculating intrinsic cont size")
 
         if let myImage = self.image {
+            print("I have an image")
             let myImageWidth = myImage.size.width
             let myImageHeight = myImage.size.height
-            let myViewWidth = self.frame.size.width
+            let myViewWidth = maxWidth
 
             let ratio = myViewWidth/myImageWidth
             let scaledHeight = myImageHeight * ratio
@@ -106,6 +108,9 @@ class ScaledHeightImageView: UIImageView {
 }
 
 class AsyncImageView: ScaledHeightImageView {
+
+    private(set) var didLoad = false
+
     var imageURL: URL? {
         didSet {
             if let url = imageURL {
@@ -116,15 +121,22 @@ class AsyncImageView: ScaledHeightImageView {
 
     var onAsyncImageSet: (() -> Void)?
 
+    func prepareForReuse() {
+        image = nil
+        imageURL = nil
+        didLoad = false
+    }
+
     private func loadWithURL(_ url: URL) {
         if let image = AsyncFetcher.shared.fetchedData(for: url) {
-                self.image = image
+            self.didLoad = true
+            self.image = image
         } else {
             self.image = UIImage(named: "placeholder")
-            self.layoutIfNeeded()
             AsyncFetcher.shared.fetchAsync(url) { [weak self] image in
                 DispatchQueue.main.async {
                     if self?.imageURL == url {
+                        self?.didLoad = true
                         self?.image = image
                         self?.onAsyncImageSet?()
                     }

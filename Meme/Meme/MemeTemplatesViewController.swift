@@ -41,6 +41,7 @@ class MemeTemplatesViewController: UIViewController {
     }
 
     var sizing = [IndexPath: CGSize]()
+    var tempSize: CGSize?
 
     private let spacing: CGFloat = 8
 
@@ -60,6 +61,7 @@ class MemeTemplatesViewController: UIViewController {
 
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
+        self.collectionView.prefetchDataSource = self
         self.collectionView.register(MemeTemplatesCollectionViewCell.self, forCellWithReuseIdentifier: cellID)
         self.collectionViewLayout.estimatedItemSize = CGSize(width: itemWidth, height: 200)
 
@@ -76,10 +78,10 @@ class MemeTemplatesViewController: UIViewController {
         }
     }
     
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        collectionView.collectionViewLayout.invalidateLayout()
-    }
+//    override func viewWillLayoutSubviews() {
+//        super.viewWillLayoutSubviews()
+//        collectionView.collectionViewLayout.invalidateLayout()
+//    }
 }
 
 extension MemeTemplatesViewController: UICollectionViewDataSourcePrefetching {
@@ -96,12 +98,10 @@ extension MemeTemplatesViewController: UICollectionViewDataSourcePrefetching {
 
 extension MemeTemplatesViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        collectionView.layoutIfNeeded()
         return templates.count
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        collectionView.layoutIfNeeded()
         let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! MemeTemplatesCollectionViewCell
 
         cell.maxWidth = itemWidth
@@ -126,20 +126,22 @@ extension MemeTemplatesViewController: UICollectionViewDataSource, UICollectionV
 
         sizingCell.maxWidth = itemWidth
         if let imageURL = self.templates[indexPath.row].imageURL {
-            print("setting url: \(imageURL)")
             sizingCell.memeImageView.imageURL = imageURL
         }
 
-        print("setneedslayout")
+        if !sizingCell.memeImageView.didLoad, let size = tempSize {
+            return size
+        }
+
         sizingCell.contentView.setNeedsLayout()
-        print("layoutifneeded")
         sizingCell.contentView.layoutIfNeeded()
 
         let size = sizingCell.contentView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-        print("size: \(size)")
 
         if sizingCell.memeImageView.didLoad {
             sizing[indexPath] = size
+        } else {
+            tempSize = size
         }
 
         return size

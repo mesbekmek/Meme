@@ -26,7 +26,7 @@ class MemeTemplatesCollectionViewCell: UICollectionViewCell {
 
     var maxWidth: CGFloat? = nil {
         didSet {
-            guard let maxWidth = maxWidth else {
+            guard let maxWidth = maxWidth, oldValue != maxWidth else {
                 return
             }
             maxWidthConstraint.isActive = true
